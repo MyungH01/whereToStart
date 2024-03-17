@@ -42,8 +42,8 @@ export default function Map() {
 				type: 'fill',
 				source: 'heang_boundary',
 				paint: {
-					'fill-color': '#d3d2d2',
-					'fill-opacity': 0.7,
+					'fill-color': '#95BEFA',
+					'fill-opacity': 0.3,
 					'fill-outline-color': '#000000',
 				},
 				filter: ['==', '$type', 'Polygon'],

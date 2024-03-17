@@ -1,21 +1,23 @@
 'use client';
-import maplibregl, { Popup } from 'maplibre-gl';
+import maplibregl from 'maplibre-gl';
 import { useEffect, useRef, useState } from 'react';
 import styles from './map.module.css';
-// import { headers } from 'next/headers';
 
 export default function Map() {
 	const mapContainer = useRef(null);
 	const map = useRef(null);
-	const [apiKey] = useState(
-		'v1.public.eyJqdGkiOiI0NjVjNGQzMC00MmNjLTQyMjItYmZlOC03Y2JlODI0N2IyZDEifU3MG4LZbMkFqOZ35LCUgdvvrj0s9m0nRmeRDczkFW7Wg8FOqu00fqQgxHVGAQ17BJSHCAbSKEAOESZNVKhjtCUefXQ_bTpOf5WMqGP2puVvuErKrflSRlfNUn-YZRmAJx8ZoE08wcELDeIHGfOJtMKvG4PjjAO5pRMFEu4BrKPZCDgD6pMrN4RVAdK_trZP3Z1vMnPVbWnVABzjTKoorSnGT3qvse0lo2PPk9_5MaQFhIZyybKx0970qUTmmnJxlai60eFi9DAxQfMqMuCmWZJ_C0zuYfOSJrw7E5T8BHwLbXojXT34bcARcVP5dNWjndPppTgIfSz6hmBvROGov_c.YTAwN2QzYTQtMjA4OC00M2Q5LWE5ZTUtYjk4Y2U1YWUxY2Uy'
-	);
+	const [apiKey] = useState(process.env.NEXT_PUBLIC_API_KEY);
 	const [lng, setlng] = useState(127.0501);
 	const [lat, setlat] = useState(37.653);
 	const [zoom, setzoom] = useState(17);
-	const mapName = 'P3Map1';
-	const region = 'ap-northeast-1';
-
+	const mapName = process.env.NEXT_PUBLIC_MAP_NAME;
+	const region = process.env.NEXT_PUBLIC_REGION;
+	const heang_boundary = require('/public/heang.json');
+	const heang_point = require('/public/heangpoint.json');
+	const boundary = [
+		[126.759751, 37.428234],
+		[127.190599, 37.703801],
+	];
 	useEffect(() => {
 		if (map.current) return;
 		map.current = new maplibregl.Map({
@@ -24,8 +26,62 @@ export default function Map() {
 			center: [lng, lat],
 			zoom: zoom,
 			attributionControl: false,
+			maxBounds: boundary,
 		});
 		map.current.addControl(new maplibregl.NavigationControl(), 'bottom-left');
+
+		map.current.on('load', async () => {
+			const image = await map.current.loadImage('https://maplibre.org/maplibre-gl-js/docs/assets/custom_marker.png');
+			map.current.addImage('custom-marker', image.data);
+			map.current.addSource('heang_boundary', { type: 'geojson', data: heang_boundary });
+			map.current.addSource('heang_point', { type: 'geojson', data: heang_point });
+			map.current.addLayer({
+				id: 'heang_boundary_fill',
+				type: 'fill',
+				source: 'heang_boundary',
+				paint: {
+					'fill-color': '#d3d2d2',
+					'fill-opacity': 0.7,
+					'fill-outline-color': '#000000',
+				},
+				filter: ['==', '$type', 'Polygon'],
+			});
+			map.current.addLayer({
+				id: 'heang_point_icon',
+				type: 'symbol',
+				source: 'heang_point',
+				filter: ['==', '$type', 'Point'],
+				layout: {
+					'icon-image': 'custom-marker',
+				},
+			});
+			map.current.on('moveend', () => {
+				const { lat: newlat, lng: newlng } = map.current.getCenter();
+				setlat(newlat.toFixed(6));
+				setlng(newlng.toFixed(6));
+			});
+			map.current.on('zoomend', () => {
+				const newzoom = map.current.getZoom();
+				setzoom(newzoom);
+			});
+			map.current.on('click', 'heang_point_icon', (e) => {
+				new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(`<h1>${e.features[0].properties.adm_nm}</h1>`).addTo(map.current);
+				map.current.flyTo({
+					center: e.features[0].geometry.coordinates,
+					zoom: 16,
+					speed: 1.5,
+					easing(t) {
+						return t;
+					},
+				});
+			});
+			map.current.on('mouseenter', 'heang_point_icon', () => {
+				map.current.getCanvas().style.cursor = 'pointer';
+			});
+			map.current.on('mouseleave', 'heang_point_icon', () => {
+				map.current.getCanvas().style.cursor = '';
+			});
+		});
 	}, []);
 
 	return (

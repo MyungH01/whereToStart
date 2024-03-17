@@ -1,11 +1,14 @@
-import Image from 'next/image';
-import styles from './page.module.css';
 import Map from './map';
+import Search from './search';
+import StoreProvider from './StoreProvider';
 
 export default function Home() {
 	return (
 		<>
-			<Map />
+			<StoreProvider>
+				<Map />
+				<Search />
+			</StoreProvider>
 		</>
 	);
 }

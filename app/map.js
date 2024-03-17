@@ -2,14 +2,16 @@
 import maplibregl from 'maplibre-gl';
 import { useEffect, useRef, useState } from 'react';
 import styles from './map.module.css';
+import { useAppDispatch, useAppSelector } from '@/lib/hooks';
+import { setlat, setlng, setzoom } from '@/lib/geo_reducer';
 
 export default function Map() {
 	const mapContainer = useRef(null);
 	const map = useRef(null);
 	const [apiKey] = useState(process.env.NEXT_PUBLIC_API_KEY);
-	const [lng, setlng] = useState(127.0501);
-	const [lat, setlat] = useState(37.653);
-	const [zoom, setzoom] = useState(17);
+	const { lng, lat, zoom } = useAppSelector((state) => state.geo);
+	const dispatch = useAppDispatch();
+
 	const mapName = process.env.NEXT_PUBLIC_MAP_NAME;
 	const region = process.env.NEXT_PUBLIC_REGION;
 	const heang_boundary = require('/public/heang.json');
@@ -57,18 +59,18 @@ export default function Map() {
 			});
 			map.current.on('moveend', () => {
 				const { lat: newlat, lng: newlng } = map.current.getCenter();
-				setlat(newlat.toFixed(6));
-				setlng(newlng.toFixed(6));
+				dispatch(setlat(newlat.toFixed(6)));
+				dispatch(setlng(newlng.toFixed(6)));
 			});
 			map.current.on('zoomend', () => {
 				const newzoom = map.current.getZoom();
-				setzoom(newzoom);
+				dispatch(setzoom(newzoom));
 			});
 			map.current.on('click', 'heang_point_icon', (e) => {
 				new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(`<h1>${e.features[0].properties.adm_nm}</h1>`).addTo(map.current);
 				map.current.flyTo({
 					center: e.features[0].geometry.coordinates,
-					zoom: 16,
+					zoom: 15,
 					speed: 1.5,
 					easing(t) {
 						return t;
@@ -84,14 +86,20 @@ export default function Map() {
 		});
 	}, []);
 
+	useEffect(() => {
+		map.current.flyTo({
+			center: [lng, lat],
+			zoom: zoom,
+			speed: 1.5,
+			easing(t) {
+				return t;
+			},
+		});
+	}, [lng, lat]);
+
 	return (
 		<>
 			<div ref={mapContainer} className={styles.mapWrap}></div>
-			<div>
-				<p>{lng}</p>
-				<p>{lat}</p>
-				<p>{zoom}</p>
-			</div>
 		</>
 	);
 }

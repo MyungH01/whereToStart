@@ -11,6 +11,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
 	return (
 		<html lang='en'>
+			<head>
+				<link href='https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.css' rel='stylesheet' />
+				{/* <script src='https://unpkg.com/maplibre-gl@4.1.1/dist/maplibre-gl.js'></script> */}
+			</head>
 			<body className={inter.className}>{children}</body>
 		</html>
 	);

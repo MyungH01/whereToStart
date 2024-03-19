@@ -5,6 +5,7 @@ import { MongoClient } from 'mongodb';
 import LoginBtn from './loginbtn';
 import LogoutBtn from './logoutbtn';
 import Image from 'next/image';
+import Userdata from './userdata';
 
 export default async function User() {
 	const uri = process.env.MONGODB_URI;
@@ -27,7 +28,7 @@ export default async function User() {
 						</>
 					)}
 				</div>
-				<div className={styles.userdata}>dd</div>
+				<Userdata />
 			</div>
 		</>
 	);

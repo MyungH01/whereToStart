@@ -1,10 +1,9 @@
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '../../auth/[...nextauth]/route';
 import { MongoClient } from 'mongodb';
-import mongoconnection from './mongo';
+import mongoconnection from '../mongo';
 
-const session = await getServerSession(authOptions);
 /**
  * @type {MongoClient}
  */
@@ -18,8 +17,9 @@ const db = client.db('sang');
  * @returns document를 {data} 로 return한다.
  */
 export async function GET(req, { params }) {
-	const data = await db.collection('data').findOne({ email: session.user.email }).favheang;
-	return NextResponse.json({ data }, { status: 200 });
+	const session = await getServerSession(authOptions);
+	const data = await db.collection('data').findOne({ email: session.user.email });
+	return NextResponse.json({ data: data.favheang }, { status: 200 });
 }
 
 /**
@@ -29,6 +29,7 @@ export async function GET(req, { params }) {
  * @returns
  */
 export async function PUT(req, { params }) {
+	const session = await getServerSession(authOptions);
 	const data = await req.json();
 	const newheang = data.newheang;
 	try {
@@ -50,6 +51,7 @@ export async function PUT(req, { params }) {
  * @returns
  */
 export async function DELETE(req, { params }) {
+	const session = await getServerSession(authOptions);
 	const data = await req.json();
 	const oldheang = data.oldheang;
 	try {

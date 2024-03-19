@@ -2,16 +2,19 @@
 	position: absolute;
 	top: 15px;
 	right: 15px;
+	border: 1px solid #0000002f;
+	background-color: #ffffffd3;
+	border-radius: 10px 10px 10px 10px;
 }
 
 .login {
 	display: flex;
-	background-color: #ffffffd3;
-	border: 1px solid #0000002f;
-	border-radius: 10px;
+	/* background-color: #ffffffd3; */
+	/* border: 1px solid #0000002f; */
+	/* border-radius: 10px 10px 0px 0px; */
 	height: 60px;
 	width: fit-content;
-	min-width: 140px;
+	min-width: 160px;
 	padding: 4px 24px;
 	align-items: center;
 	justify-content: space-between;

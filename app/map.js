@@ -21,6 +21,7 @@ export default function Map() {
 		[126.759751, 37.428234],
 		[127.190599, 37.703801],
 	];
+
 	useEffect(() => {
 		if (map.current) return;
 		map.current = new maplibregl.Map({
@@ -35,14 +36,14 @@ export default function Map() {
 
 		map.current.on('load', async () => {
 			const image = await map.current.loadImage('https://maplibre.org/maplibre-gl-js/docs/assets/custom_marker.png');
-			// const image2 = await map.current.loadImage(
-			// 	'https://api.geoapify.com/v1/icon/?type=awesome&scaleFactor=2&color=%23e68d6f&size=large&icon=train&iconSize=large&apiKey=6dc7fb95a3b246cfa0f3bcef5ce9ed9a'
-			// );
-			map.current.addImage('custom-marker', image.data);
-			// map.current.addImage('custom-marker2', image2.data);
+			map.current.addImage('custom-marker', image.data, {});
+			map.current.addImage('custom-marker2', image.data, {
+				sdf: 'true',
+			});
 			map.current.addSource('heang_boundary', { type: 'geojson', data: heang_boundary });
 			map.current.addSource('heang_point', { type: 'geojson', data: heang_point });
 			map.current.addSource('sang_point', { type: 'geojson', data: sang_point });
+			map.current.addSource('highlight', { type: 'geojson', data: {} });
 			map.current.addLayer({
 				id: 'heang_boundary_fill',
 				type: 'fill',
@@ -51,6 +52,17 @@ export default function Map() {
 					'fill-color': '#95BEFA',
 					'fill-opacity': 0.3,
 					'fill-outline-color': '#000000',
+				},
+				filter: ['==', '$type', 'Polygon'],
+			});
+			map.current.addLayer({
+				id: 'highlight_fill',
+				type: 'fill',
+				source: 'highlight',
+				paint: {
+					'fill-color': '#FFFB00',
+					'fill-opacity': 0.3,
+					'fill-outline-color': '#74FF00',
 				},
 				filter: ['==', '$type', 'Polygon'],
 			});
@@ -68,8 +80,13 @@ export default function Map() {
 				type: 'symbol',
 				source: 'sang_point',
 				filter: ['==', '$type', 'Point'],
+				minzoom: 12,
 				layout: {
-					'icon-image': 'custom-marker',
+					'icon-image': 'custom-marker2',
+					'icon-size': 0.7,
+				},
+				paint: {
+					'icon-color': '#958EFA',
 				},
 			});
 
@@ -83,7 +100,68 @@ export default function Map() {
 				dispatch(setzoom(newzoom));
 			});
 			map.current.on('click', 'heang_point_icon', (e) => {
-				new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(`<h1>${e.features[0].properties.adm_nm}</h1>`).addTo(map.current);
+				const pophtml = `
+					<div class='pop'>
+						<div class='name'>
+							<label class='label'>${e.features[0].properties.adm_nm}</label>
+							<div>
+								<button id='favadd'>추가</button>
+								<button id='favdel'>제거</button>
+							</div>
+						</div>
+						<div class='items'>
+							<div class='item'>소속된 총 점포 수</div>
+							<div class='item'>소속된 상권의 총 매출</div>
+							<div class='item'>소속된 상권의 평균 매출</div>
+							<div class='item'>가장 점포가 많은 업종</div>
+							<div class='item'>가장 매출이 높은 업종</div>
+						</div>
+					</div>
+				`;
+				new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(pophtml).addTo(map.current).setMaxWidth('100vw');
+
+				map.current.flyTo({
+					center: [e.features[0].geometry.coordinates[0], e.features[0].geometry.coordinates[1] + 0.002],
+					zoom: 14,
+					speed: 1.5,
+					easing(t) {
+						return t;
+					},
+				});
+				document.getElementById('favadd').addEventListener('click', function () {
+					alert('tlqkf');
+				});
+				document.getElementById('favdel').addEventListener('click', function () {
+					alert('tlqkf');
+				});
+			});
+			map.current.on('mouseenter', 'heang_point_icon', () => {
+				map.current.getCanvas().style.cursor = 'pointer';
+			});
+			map.current.on('mouseleave', 'heang_point_icon', () => {
+				map.current.getCanvas().style.cursor = '';
+			});
+			map.current.on('click', 'sang_point_icon', (e) => {
+				const pophtml = `
+				<div class='pop'>
+					<div class='name'>
+						<label class='label'>${e.features[0].properties.cd_nm}</label>
+						<div>
+							<button id='favadd'>추가</button>
+							<button id='favdel'>제거</button>
+						</div>
+					</div>
+					<div class='items'>
+						<div class='item'>소속된 총 점포 수</div>
+						<div class='item'>소속된 상권의 총 매출</div>
+						<div class='item'>소속된 상권의 평균 매출</div>
+						<div class='item'>가장 점포가 많은 업종</div>
+						<div class='item'>가장 매출이 높은 업종</div>
+					</div>
+				</div>
+			`;
+				new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(pophtml).addTo(map.current).setMaxWidth('100vw');
+
 				map.current.flyTo({
 					center: e.features[0].geometry.coordinates,
 					zoom: 15,
@@ -92,11 +170,17 @@ export default function Map() {
 						return t;
 					},
 				});
+				document.getElementById('favadd').addEventListener('click', function () {
+					alert('tlqkf');
+				});
+				document.getElementById('favdel').addEventListener('click', function () {
+					alert('tlqkf');
+				});
 			});
-			map.current.on('mouseenter', 'heang_point_icon', () => {
+			map.current.on('mouseenter', 'sang_point_icon', () => {
 				map.current.getCanvas().style.cursor = 'pointer';
 			});
-			map.current.on('mouseleave', 'heang_point_icon', () => {
+			map.current.on('mouseleave', 'sang_point_icon', () => {
 				map.current.getCanvas().style.cursor = '';
 			});
 		});
@@ -112,6 +196,10 @@ export default function Map() {
 			},
 		});
 	}, [lng, lat]);
+
+	useEffect(() => {
+		// map.current.getSource('highlight').setData();
+	}, []);
 
 	return (
 		<>

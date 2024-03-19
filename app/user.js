@@ -8,10 +8,8 @@ import Image from 'next/image';
 import Userdata from './userdata';
 
 export default async function User() {
-	const uri = process.env.MONGODB_URI;
-	const client = await MongoClient.connect(uri);
-	const db = client.db();
 	const session = await getServerSession(authOptions);
+
 	return (
 		<>
 			<div className={styles.user}>
@@ -28,7 +26,7 @@ export default async function User() {
 						</>
 					)}
 				</div>
-				<Userdata />
+				{session ? <Userdata session={session} /> : <></>}
 			</div>
 		</>
 	);

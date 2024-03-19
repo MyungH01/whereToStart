@@ -132,4 +132,28 @@ table {
 	border-radius: 6px !important;
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
 	padding: 30px 20px !important;
+	width: 600px;
+	height: fit-content;
+}
+.maplibregl-popup-content .pop {
+	background-color: rgb(196, 136, 136);
+}
+.maplibregl-popup-content .pop .name {
+	display: flex;
+	height: 60px;
+	justify-content: space-between;
+	align-items: center;
+}
+.maplibregl-popup-content .pop .label {
+	font-size: 2em;
+	font-weight: 600;
+}
+
+.maplibregl-popup-content .pop .items {
+	display: flex;
+}
+.maplibregl-popup-content .pop .item {
+	width: 120px;
+	height: 100px;
+	background-color: rgb(111, 112, 196);
 }

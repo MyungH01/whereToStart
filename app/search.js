@@ -33,6 +33,8 @@ export default function Search() {
 							dispatch(setlat(hit.lat));
 							dispatch(setlng(hit.lng));
 							dispatch(setzoom(15));
+							dispatch({ type: 'search/change', change: hit.dong });
+							sethits([]);
 						}}
 					>
 						{hit.dong}

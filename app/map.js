@@ -16,6 +16,7 @@ export default function Map() {
 	const region = process.env.NEXT_PUBLIC_REGION;
 	const heang_boundary = require('/public/heang.json');
 	const heang_point = require('/public/heangpoint.json');
+	const sang_point = require('/public/sangpoint.json');
 	const boundary = [
 		[126.759751, 37.428234],
 		[127.190599, 37.703801],
@@ -34,9 +35,14 @@ export default function Map() {
 
 		map.current.on('load', async () => {
 			const image = await map.current.loadImage('https://maplibre.org/maplibre-gl-js/docs/assets/custom_marker.png');
+			// const image2 = await map.current.loadImage(
+			// 	'https://api.geoapify.com/v1/icon/?type=awesome&scaleFactor=2&color=%23e68d6f&size=large&icon=train&iconSize=large&apiKey=6dc7fb95a3b246cfa0f3bcef5ce9ed9a'
+			// );
 			map.current.addImage('custom-marker', image.data);
+			// map.current.addImage('custom-marker2', image2.data);
 			map.current.addSource('heang_boundary', { type: 'geojson', data: heang_boundary });
 			map.current.addSource('heang_point', { type: 'geojson', data: heang_point });
+			map.current.addSource('sang_point', { type: 'geojson', data: sang_point });
 			map.current.addLayer({
 				id: 'heang_boundary_fill',
 				type: 'fill',
@@ -57,6 +63,16 @@ export default function Map() {
 					'icon-image': 'custom-marker',
 				},
 			});
+			map.current.addLayer({
+				id: 'sang_point_icon',
+				type: 'symbol',
+				source: 'sang_point',
+				filter: ['==', '$type', 'Point'],
+				layout: {
+					'icon-image': 'custom-marker',
+				},
+			});
+
 			map.current.on('moveend', () => {
 				const { lat: newlat, lng: newlng } = map.current.getCenter();
 				dispatch(setlat(newlat.toFixed(6)));

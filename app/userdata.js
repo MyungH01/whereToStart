@@ -9,7 +9,7 @@ export default function Userdata() {
 				<label>즐겨찾기</label>
 				<div>
 					<div>행정동</div>
-					<div>상권</div>
+					<div>상권 </div>
 				</div>
 				<hr />
 				<div>

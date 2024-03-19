@@ -10,6 +10,7 @@ export default function Map() {
 	const map = useRef(null);
 	const [apiKey] = useState(process.env.NEXT_PUBLIC_API_KEY);
 	const { lng, lat, zoom } = useAppSelector((state) => state.geo);
+	const { curheang, cursang } = useAppSelector((state) => state.cur);
 	const dispatch = useAppDispatch();
 
 	const mapName = process.env.NEXT_PUBLIC_MAP_NAME;
@@ -121,19 +122,16 @@ export default function Map() {
 				new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(pophtml).addTo(map.current).setMaxWidth('100vw');
 
 				map.current.flyTo({
-					center: [e.features[0].geometry.coordinates[0], e.features[0].geometry.coordinates[1] + 0.002],
+					// center: [e.features[0].geometry.coordinates[0], e.features[0].geometry.coordinates[1] + 0.002],
+					center: e.features[0].geometry.coordinates,
 					zoom: 14,
 					speed: 1.5,
 					easing(t) {
 						return t;
 					},
 				});
-				document.getElementById('favadd').addEventListener('click', function () {
-					alert('tlqkf');
-				});
-				document.getElementById('favdel').addEventListener('click', function () {
-					alert('tlqkf');
-				});
+				dispatch({ type: 'cur/setcurheang', code: e.features[0].properties.adm_cd2, name: e.features[0].properties.adm_nm });
+				dispatch({ type: 'cur/setcursang', code: 0, name: '' });
 			});
 			map.current.on('mouseenter', 'heang_point_icon', () => {
 				map.current.getCanvas().style.cursor = 'pointer';
@@ -143,23 +141,23 @@ export default function Map() {
 			});
 			map.current.on('click', 'sang_point_icon', (e) => {
 				const pophtml = `
-				<div class='pop'>
-					<div class='name'>
-						<label class='label'>${e.features[0].properties.cd_nm}</label>
-						<div>
-							<button id='favadd'>추가</button>
-							<button id='favdel'>제거</button>
+					<div class='pop'>
+						<div class='name'>
+							<label class='label'>${e.features[0].properties.cd_nm}</label>
+							<div>
+								<button id='favadd'>추가</button>
+								<button id='favdel'>제거</button>
+							</div>
+						</div>
+						<div class='items'>
+							<div class='item'>소속된 총 점포 수</div>
+							<div class='item'>소속된 상권의 총 매출</div>
+							<div class='item'>소속된 상권의 평균 매출</div>
+							<div class='item'>가장 점포가 많은 업종</div>
+							<div class='item'>가장 매출이 높은 업종</div>
 						</div>
 					</div>
-					<div class='items'>
-						<div class='item'>소속된 총 점포 수</div>
-						<div class='item'>소속된 상권의 총 매출</div>
-						<div class='item'>소속된 상권의 평균 매출</div>
-						<div class='item'>가장 점포가 많은 업종</div>
-						<div class='item'>가장 매출이 높은 업종</div>
-					</div>
-				</div>
-			`;
+				`;
 				new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(pophtml).addTo(map.current).setMaxWidth('100vw');
 
 				map.current.flyTo({
@@ -170,12 +168,8 @@ export default function Map() {
 						return t;
 					},
 				});
-				document.getElementById('favadd').addEventListener('click', function () {
-					alert('tlqkf');
-				});
-				document.getElementById('favdel').addEventListener('click', function () {
-					alert('tlqkf');
-				});
+				dispatch({ type: 'cur/setcurheang', code: e.features[0].properties.ab_cd, name: e.features[0].properties.ab_nm });
+				dispatch({ type: 'cur/setcursang', code: e.features[0].properties.cd_cd, name: e.features[0].properties.cd_nm });
 			});
 			map.current.on('mouseenter', 'sang_point_icon', () => {
 				map.current.getCanvas().style.cursor = 'pointer';
@@ -198,12 +192,44 @@ export default function Map() {
 	}, [lng, lat]);
 
 	useEffect(() => {
-		// map.current.getSource('highlight').setData();
-	}, []);
+		if (curheang.code != 0 || cursang.code != 0) {
+			document.getElementById('favadd').addEventListener('click', function () {
+				alert('tlqkf');
+			});
+			document.getElementById('favdel').addEventListener('click', function () {
+				alert('tlqkf');
+			});
+			// 	const pophtml = `
+			// 	<div class='pop'>
+			// 		<div class='name'>
+			// 			<label class='label'>${curheang.name}${cursang.code != 0 ? '(' + cursang.name + ')' : ''}</label>
+			// 			<div>
+			// 				<button id='favadd'>추가</button>
+			// 				<button id='favdel'>제거</button>
+			// 			</div>
+			// 		</div>
+			// 		<div class='items'>
+			// 			<div class='item'>소속된 총 점포 수</div>
+			// 			<div class='item'>소속된 상권의 총 매출</div>
+			// 			<div class='item'>소속된 상권의 평균 매출</div>
+			// 			<div class='item'>가장 점포가 많은 업종</div>
+			// 			<div class='item'>가장 매출이 높은 업종</div>
+			// 		</div>
+			// 	</div>
+			// `;
+			// 	new maplibregl.Popup().setLngLat([lng, lat]).setHTML(pophtml).addTo(map.current).setMaxWidth('100vw');
+		}
+	}, [curheang, cursang]);
 
 	return (
 		<>
 			<div ref={mapContainer} className={styles.mapWrap}></div>
+			<div>
+				<div>{curheang.code}</div>
+				<div>{curheang.name}</div>
+				<div>{cursang.code}</div>
+				<div>{cursang.name}</div>
+			</div>
 		</>
 	);
 }

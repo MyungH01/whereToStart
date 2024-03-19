@@ -6,5 +6,11 @@
 	padding: 10px 5px 0 5px;
 	justify-content: space-around;
 }
-.label {
+.list {
+	padding-left: 10px;
+	padding-bottom: 5px;
+	font-size: 1em;
+}
+.list:last-child {
+	padding-bottom: 10px;
 }

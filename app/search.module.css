@@ -1,7 +1,7 @@
 .search {
 	position: absolute;
-	top: 15px;
-	left: 15px;
+	top: 25px;
+	left: 25px;
 }
 .input {
 	display: flex;
@@ -9,14 +9,14 @@
 	border-radius: 10px;
 	padding: 10px 10px;
 	justify-content: space-between;
-	min-width: 180px;
-	width: 180px;
+	min-width: 200px;
+	width: 200px;
 	align-items: center;
 }
 .input input {
 	border: none;
-	min-width: 160px;
-	width: 160px;
+	min-width: 180px;
+	width: 180px;
 	background: #ffffff;
 	font-size: 16px;
 }
@@ -27,11 +27,15 @@
 }
 .hit {
 	background-color: white;
-	border-radius: 10px;
+	border: 1px double grey;
+	border-radius: 5px;
 	padding: 10px 10px;
 	min-width: 160px;
 	align-items: center;
-	margin-top: 5px;
 	user-select: none;
 	cursor: pointer;
+	margin-top: 0px;
+}
+.hit:first-child {
+	margin-top: 3px;
 }

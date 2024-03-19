@@ -34,7 +34,7 @@ export default function Userdata({ session }) {
 							setch(2);
 						}}
 					>
-						상권{' '}
+						상권
 					</div>
 				</div>
 				<hr />

@@ -136,7 +136,7 @@ table {
 	height: fit-content;
 }
 .maplibregl-popup-content .pop {
-	background-color: rgb(196, 136, 136);
+	/* background-color: rgb(196, 136, 136); */
 }
 .maplibregl-popup-content .pop .name {
 	display: flex;
@@ -156,5 +156,5 @@ table {
 .maplibregl-popup-content .pop .item {
 	width: 120px;
 	height: 100px;
-	background-color: rgb(111, 112, 196);
+	/* background-color: rgb(111, 112, 196); */
 }

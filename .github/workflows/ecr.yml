@@ -28,7 +28,6 @@ jobs:
         echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
         echo "MYSQL_PW=${{ secrets.MYSQL_PW }}" >> .env
         echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env
-        echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4

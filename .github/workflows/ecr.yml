@@ -1,0 +1,57 @@
+name: Deploy to ECR
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build and Push Image to ECR
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Create .env file
+      run: |
+        echo "NEXT_PUBLIC_API_KEY=${{ secrets.NEXT_PUBLIC_API_KEY }}" >> .env
+        echo "NEXT_PUBLIC_MAP_NAME=${{ secrets.NEXT_PUBLIC_MAP_NAME }}" >> .env
+        echo "NEXT_PUBLIC_REGION=${{ secrets.NEXT_PUBLIC_REGION }}" >> .env
+        echo "MEILI_HOST=${{ secrets.MEILI_HOST }}" >> .env
+        echo "MEILI_API=${{ secrets.MEILI_API }}" >> .env
+        echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
+        echo "DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }}" >> .env
+        echo "DISCORD_CLIENT_SECRET=${{ secrets.DISCORD_CLIENT_SECRET }}" >> .env
+        echo "MYSQL_HOST=${{ secrets.MYSQL_HOST }}" >> .env
+        echo "MYSQL_DB=${{ secrets.MYSQL_DB }}" >> .env
+        echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+        echo "MYSQL_PW=${{ secrets.MYSQL_PW }}" >> .env
+        echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-1
+
+    - name: Get ECR login password
+      run: |
+        echo "$(aws ecr get-login-password --region ap-northeast-1)" | docker login --username AWS --password-stdin 851725294202.dkr.ecr.ap-northeast-1.amazonaws.com
+
+    - name: Build, tag, and push image to Amazon ECR
+      run: |
+        IMAGE_TAG=${{ github.run_number }}
+        LATEST_TAG=latest
+        IMAGE_REPO=sesac-ecr
+        ECR_REGISTRY=851725294202.dkr.ecr.ap-northeast-1.amazonaws.com
+        docker build -t $IMAGE_REPO:$IMAGE_TAG .
+        docker tag $IMAGE_REPO:$IMAGE_TAG $ECR_REGISTRY/$IMAGE_REPO:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$IMAGE_REPO:$IMAGE_TAG
+        
+        docker tag $IMAGE_REPO:$IMAGE_TAG $ECR_REGISTRY/$IMAGE_REPO:$LATEST_TAG
+        docker push $ECR_REGISTRY/$IMAGE_REPO:$LATEST_TAG 
+
+
+        

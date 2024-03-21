@@ -16,7 +16,7 @@ COPY . .
 # 빌드 스크립트 실행 
 RUN npm run build
 
-EXPOSE 3000
+EXPOSE 80
 
 # 애플리케이션 시작
 CMD ["npm", "run", "start"]

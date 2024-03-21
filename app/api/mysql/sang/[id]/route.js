@@ -6,11 +6,7 @@ import connection from '../../connect';
  * @param {NextRequest} req
  * @param {*} param1
  */
-export async function POST(req, { params }) {
-	const body = await req.json();
-	const { table, code } = body;
-
-	const [rows, fields] = await connection.execute(`SELECT * from ${table} WHERE cd_cd = ${code}`);
-
+export async function GET(req, { params }) {
+	const [rows, fields] = await connection.execute(`SELECT * from sss WHERE cd_cd = ${params.id}`);
 	return NextResponse.json({ data: rows }, { status: 200 });
 }

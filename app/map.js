@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './map.module.css';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { setlat, setlng, setzoom } from '@/lib/geo_reducer';
+import { setchanged, setheang, setsang, setwhich } from '@/lib/fav_reducer';
 
 export default function Map() {
 	const mapContainer = useRef(null);
@@ -11,7 +12,10 @@ export default function Map() {
 	const [apiKey] = useState(process.env.NEXT_PUBLIC_API_KEY);
 	const { lng, lat, zoom } = useAppSelector((state) => state.geo);
 	const { curheang, cursang } = useAppSelector((state) => state.cur);
+	const { heang, sang } = useAppSelector((state) => state.ufav);
+	const [cboundary, setcboundary] = useState([]);
 	const dispatch = useAppDispatch();
+	const [selectdata, setselectdata] = useState({});
 
 	const mapName = process.env.NEXT_PUBLIC_MAP_NAME;
 	const region = process.env.NEXT_PUBLIC_REGION;
@@ -33,6 +37,7 @@ export default function Map() {
 			attributionControl: false,
 			maxBounds: boundary,
 		});
+
 		map.current.addControl(new maplibregl.NavigationControl(), 'bottom-left');
 
 		map.current.on('load', async () => {
@@ -91,47 +96,39 @@ export default function Map() {
 				},
 			});
 
-			map.current.on('moveend', () => {
-				const { lat: newlat, lng: newlng } = map.current.getCenter();
-				dispatch(setlat(newlat.toFixed(6)));
-				dispatch(setlng(newlng.toFixed(6)));
-			});
-			map.current.on('zoomend', () => {
-				const newzoom = map.current.getZoom();
-				dispatch(setzoom(newzoom));
-			});
+			// map.current.on('moveend', () => {
+			// 	const { lat: newlat, lng: newlng } = map.current.getCenter();
+			// 	dispatch(setlat(newlat.toFixed(6)));
+			// 	dispatch(setlng(newlng.toFixed(6)));
+			// });
+			// map.current.on('zoomend', () => {
+			// 	const newzoom = map.current.getZoom();
+			// 	dispatch(setzoom(newzoom));
+			// });
 			map.current.on('click', 'heang_point_icon', (e) => {
-				const pophtml = `
-					<div class='pop'>
-						<div class='name'>
-							<label class='label'>${e.features[0].properties.adm_nm}</label>
-							<div>
-								<button id='favadd'>추가</button>
-								<button id='favdel'>제거</button>
-							</div>
-						</div>
-						<div class='items'>
-							<div class='item'>소속된 총 점포 수</div>
-							<div class='item'>소속된 상권의 총 매출</div>
-							<div class='item'>소속된 상권의 평균 매출</div>
-							<div class='item'>가장 점포가 많은 업종</div>
-							<div class='item'>가장 매출이 높은 업종</div>
-						</div>
-					</div>
-				`;
-				new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(pophtml).addTo(map.current).setMaxWidth('100vw');
-
-				map.current.flyTo({
-					// center: [e.features[0].geometry.coordinates[0], e.features[0].geometry.coordinates[1] + 0.002],
-					center: e.features[0].geometry.coordinates,
-					zoom: 14,
-					speed: 1.5,
-					easing(t) {
-						return t;
-					},
+				dispatch(setlng(e.features[0].geometry.coordinates[0]));
+				dispatch(setlat(e.features[0].geometry.coordinates[1]));
+				dispatch(setzoom(15));
+				dispatch({
+					type: 'cur/setcurheang',
+					code: e.features[0].properties.ab_cd,
+					name: e.features[0].properties.adm_nm,
+					sum_cm_sa: e.features[0].properties.sum_cm_sa,
+					sum_total_ns: e.features[0].properties.sum_total_ns,
+					ratio_cm_sa_ns: e.features[0].properties.ratio_cm_sa_ns,
+					max_total_ns_st_nm: e.features[0].properties.max_total_ns_st_nm,
+					max_cm_sa_st_nm: e.features[0].properties.max_cm_sa_st_nm,
 				});
-				dispatch({ type: 'cur/setcurheang', code: e.features[0].properties.adm_cd2, name: e.features[0].properties.adm_nm });
-				dispatch({ type: 'cur/setcursang', code: 0, name: '' });
+				dispatch({
+					type: 'cur/setcursang',
+					code: 0,
+					name: '',
+					sum_cm_sa: 0,
+					sum_total_ns: 0,
+					ratio_cm_sa_ns: 0,
+					max_total_ns_st_nm: '',
+					max_cm_sa_st_nm: '',
+				});
 			});
 			map.current.on('mouseenter', 'heang_point_icon', () => {
 				map.current.getCanvas().style.cursor = 'pointer';
@@ -140,36 +137,29 @@ export default function Map() {
 				map.current.getCanvas().style.cursor = '';
 			});
 			map.current.on('click', 'sang_point_icon', (e) => {
-				const pophtml = `
-					<div class='pop'>
-						<div class='name'>
-							<label class='label'>${e.features[0].properties.cd_nm}</label>
-							<div>
-								<button id='favadd'>추가</button>
-								<button id='favdel'>제거</button>
-							</div>
-						</div>
-						<div class='items'>
-							<div class='item'>소속된 총 점포 수</div>
-							<div class='item'>소속된 상권의 총 매출</div>
-							<div class='item'>소속된 상권의 평균 매출</div>
-							<div class='item'>가장 점포가 많은 업종</div>
-							<div class='item'>가장 매출이 높은 업종</div>
-						</div>
-					</div>
-				`;
-				new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(pophtml).addTo(map.current).setMaxWidth('100vw');
-
-				map.current.flyTo({
-					center: e.features[0].geometry.coordinates,
-					zoom: 15,
-					speed: 1.5,
-					easing(t) {
-						return t;
-					},
+				dispatch(setlng(e.features[0].geometry.coordinates[0]));
+				dispatch(setlat(e.features[0].geometry.coordinates[1]));
+				dispatch(setzoom(16));
+				dispatch({
+					type: 'cur/setcurheang',
+					code: e.features[0].properties.ab_cd,
+					name: e.features[0].properties.ab_nm,
+					sum_cm_sa: e.features[0].properties.sum_cm_sa,
+					sum_total_ns: e.features[0].properties.sum_total_ns,
+					ratio_cm_sa_ns: e.features[0].properties.ratio_cm_sa_ns,
+					max_total_ns_st_nm: e.features[0].properties.max_total_ns_st_nm,
+					max_cm_sa_st_nm: e.features[0].properties.max_cm_sa_st_nm,
 				});
-				dispatch({ type: 'cur/setcurheang', code: e.features[0].properties.ab_cd, name: e.features[0].properties.ab_nm });
-				dispatch({ type: 'cur/setcursang', code: e.features[0].properties.cd_cd, name: e.features[0].properties.cd_nm });
+				dispatch({
+					type: 'cur/setcursang',
+					code: e.features[0].properties.cd_cd,
+					name: e.features[0].properties.cd_nm,
+					sum_cm_sa: e.features[0].properties.sum_cm_sa,
+					sum_total_ns: e.features[0].properties.sum_total_ns,
+					ratio_cm_sa_ns: e.features[0].properties.ratio_cm_sa_ns,
+					max_total_ns_st_nm: e.features[0].properties.max_total_ns_st_nm,
+					max_cm_sa_st_nm: e.features[0].properties.max_cm_sa_st_nm,
+				});
 			});
 			map.current.on('mouseenter', 'sang_point_icon', () => {
 				map.current.getCanvas().style.cursor = 'pointer';
@@ -182,54 +172,154 @@ export default function Map() {
 
 	useEffect(() => {
 		map.current.flyTo({
-			center: [lng, lat],
+			center: [lng, Number(lat) + 0.001],
 			zoom: zoom,
 			speed: 1.5,
 			easing(t) {
 				return t;
 			},
 		});
-	}, [lng, lat]);
+	}, [lat, lng]);
 
 	useEffect(() => {
 		if (curheang.code != 0 || cursang.code != 0) {
+			// cursang.code == 0 ? heangdata(curheang.code, setselectdata) : sangdata(cursang.code, setselectdata);
+
+			const popups = document.getElementsByClassName('maplibregl-popup');
+
+			if (popups.length) {
+				popups[0].remove();
+			}
+			console.log(curheang);
+			console.log(cursang);
+			const pophtml = `
+			<div class='pop'>
+				<div class='name'>
+					<label class='label'>${curheang.name}${cursang.code == 0 ? '' : ' / ' + cursang.name}</label>
+					<div>
+						<button id='favadd'>추가</button>
+						<button id='favdel'>제거</button>
+					</div>
+				</div>
+				<div class='items'>
+					<div class='item'>${cursang.code == 0 ? curheang.sum_cm_sa : cursang.sum_cm_sa}</div>
+					<div class='item'>${cursang.code == 0 ? curheang.sum_total_ns : cursang.sum_total_ns}</div>
+					<div class='item'>${cursang.code == 0 ? curheang.ratio_cm_sa_ns : cursang.ratio_cm_sa_ns}</div>
+					<div class='item'>${cursang.code == 0 ? curheang.max_total_ns_st_nm : cursang.max_total_ns_st_nm}</div>
+					<div class='item'>${cursang.code == 0 ? curheang.max_cm_sa_st_nm : cursang.max_cm_sa_st_nm}</div>
+				</div>
+			</div>
+		`;
+			new maplibregl.Popup().setLngLat([lng, lat]).setHTML(pophtml).addTo(map.current).setMaxWidth('100vw');
+
 			document.getElementById('favadd').addEventListener('click', function () {
-				alert('tlqkf');
+				fetch(`/api/fav/${cursang.code == 0 ? 'heang' : 'sang'}`, {
+					method: 'PUT',
+					body: JSON.stringify({
+						newheang: { ...curheang, lat: lat, lng: lng },
+						newsang: { ...cursang, lat: lat, lng: lng, heang_code: curheang.code, heang_name: curheang.name },
+					}),
+				})
+					.then((res) => res.json())
+					.then((data) => console.log(data));
+				dispatch(setchanged(true));
+				dispatch(setwhich(cursang.code == 0 ? 1 : 2));
 			});
 			document.getElementById('favdel').addEventListener('click', function () {
-				alert('tlqkf');
+				fetch(`/api/fav/${cursang.code == 0 ? 'heang' : 'sang'}`, {
+					method: 'DELETE',
+					body: JSON.stringify({
+						oldheang: curheang,
+						oldsang: cursang,
+					}),
+				})
+					.then((res) => res.json())
+					.then((data) => console.log(data));
+				dispatch(setchanged(true));
+				dispatch(setwhich(cursang.code == 0 ? 1 : 2));
 			});
-			// 	const pophtml = `
-			// 	<div class='pop'>
-			// 		<div class='name'>
-			// 			<label class='label'>${curheang.name}${cursang.code != 0 ? '(' + cursang.name + ')' : ''}</label>
-			// 			<div>
-			// 				<button id='favadd'>추가</button>
-			// 				<button id='favdel'>제거</button>
-			// 			</div>
-			// 		</div>
-			// 		<div class='items'>
-			// 			<div class='item'>소속된 총 점포 수</div>
-			// 			<div class='item'>소속된 상권의 총 매출</div>
-			// 			<div class='item'>소속된 상권의 평균 매출</div>
-			// 			<div class='item'>가장 점포가 많은 업종</div>
-			// 			<div class='item'>가장 매출이 높은 업종</div>
-			// 		</div>
-			// 	</div>
-			// `;
-			// 	new maplibregl.Popup().setLngLat([lng, lat]).setHTML(pophtml).addTo(map.current).setMaxWidth('100vw');
 		}
+		searchboundary(curheang.code, setcboundary);
 	}, [curheang, cursang]);
+
+	useEffect(() => {
+		if (curheang.code != 0 || cursang.code != 0) {
+			const highlight_geojson = {
+				type: 'FeatureCollection',
+				features: [
+					{
+						type: 'Feature',
+						geometry: {
+							type: 'MultiPolygon',
+							coordinates: cboundary.data,
+						},
+					},
+				],
+			};
+			map.current.getSource('highlight').setData(highlight_geojson);
+		}
+	}, [cboundary]);
 
 	return (
 		<>
 			<div ref={mapContainer} className={styles.mapWrap}></div>
-			<div>
+			{/* <div>
 				<div>{curheang.code}</div>
 				<div>{curheang.name}</div>
 				<div>{cursang.code}</div>
 				<div>{cursang.name}</div>
-			</div>
+			</div> */}
 		</>
 	);
+}
+
+/**
+ *
+ * @param {number} code
+ * @param {Function} setcboundary
+ */
+function searchboundary(code, setcboundary) {
+	if (code != 0) {
+		fetch(`/api/boundary/${code}`, {
+			method: 'GET',
+		})
+			.then((res) => res.json())
+			.then((data) => setcboundary(data));
+	}
+}
+
+/**
+ *
+ * @param {Function} setselectdata
+ */
+function heangdata(code, setselectdata) {
+	fetch(`/api/mysql/heang`, {
+		method: 'POST',
+		body: JSON.stringify({
+			table: 'ab_cd_summary_view',
+			code: code,
+		}),
+	})
+		.then((res) => res.json())
+		.then((data) => {
+			setselectdata(data.data[0]);
+		});
+}
+
+/**
+ *
+ * @param {Function} setselectdata
+ */
+function sangdata(code, setselectdata) {
+	fetch(`/api/mysql/sang`, {
+		method: 'POST',
+		body: JSON.stringify({
+			table: 'cd_summary_view',
+			code: code,
+		}),
+	})
+		.then((res) => res.json())
+		.then((data) => {
+			setselectdata(data.data[0]);
+		});
 }

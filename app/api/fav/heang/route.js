@@ -32,15 +32,17 @@ export async function PUT(req, { params }) {
 	const session = await getServerSession(authOptions);
 	const data = await req.json();
 	const newheang = data.newheang;
-	try {
-		await db.collection('data').updateOne(
-			{ email: session.user.email }, // 조건
-			{ $push: { favheang: newheang } } // 새 이메일 추가
-		);
+	const check = await db.collection('data').findOne({ email: session.user.email, 'favheang.code': newheang.code });
+	if (check) {
 		return NextResponse.json({ message: '요청성공' }, { status: 200 });
-	} catch (error) {
-		console.log(error);
-		return NextResponse.json({ message: '요청실패' }, { status: 500 });
+	} else {
+		try {
+			await db.collection('data').updateOne({ email: session.user.email }, { $push: { favheang: newheang } });
+			return NextResponse.json({ message: '요청성공' }, { status: 200 });
+		} catch (error) {
+			console.log(error);
+			return NextResponse.json({ message: '요청실패' }, { status: 500 });
+		}
 	}
 }
 
@@ -55,11 +57,8 @@ export async function DELETE(req, { params }) {
 	const data = await req.json();
 	const oldheang = data.oldheang;
 	try {
-		await db.collection('data').updateOne(
-			{ email: session.user.email }, // 조건
-			{ $push: { favsang: oldheang } } // 기존 이메일 삭제
-		);
-		return NextResponse.json({ message: '요청실패' }, { status: 200 });
+		await db.collection('data').updateOne({ email: session.user.email }, { $pull: { favheang: { code: { $eq: oldheang.code } } } });
+		return NextResponse.json({ message: '요청성공' }, { status: 200 });
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json({ message: '요청실패' }, { status: 500 });

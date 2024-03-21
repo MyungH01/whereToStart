@@ -5,11 +5,13 @@
 	display: flex;
 	padding: 10px 5px 0 5px;
 	justify-content: space-around;
+	cursor: pointer;
 }
 .list {
 	padding-left: 10px;
 	padding-bottom: 5px;
 	font-size: 1em;
+	cursor: pointer;
 }
 .list:last-child {
 	padding-bottom: 10px;

@@ -27,7 +27,6 @@ export async function GET(req, { params }) {
 	} else {
 		console.log('existing');
 	}
-
 	const url = new URL(req.url);
 	const response = NextResponse.redirect(new URL('/', url));
 	return response;

@@ -9,7 +9,7 @@ COPY package*.json ./
 
 # 프로덕션 의존성만 설치
 # 개발 의존성이 필요한 경우, --only=development 플래그를 추가
-RUN npm install --only=production && npm install typescript --save-dev
+RUN npm install --only=production && npm install typescript --save-dev 
 
 # 나머지 애플리케이션 소스 코드를 이미지로 복사
 COPY . .

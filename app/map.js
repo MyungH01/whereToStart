@@ -290,39 +290,3 @@ function searchboundary(code, setcboundary) {
 			.then((data) => setcboundary(data));
 	}
 }
-
-/**
- *
- * @param {Function} setselectdata
- */
-function heangdata(code, setselectdata) {
-	fetch(`/api/mysql/heang`, {
-		method: 'POST',
-		body: JSON.stringify({
-			table: 'ab_cd_summary_view',
-			code: code,
-		}),
-	})
-		.then((res) => res.json())
-		.then((data) => {
-			setselectdata(data.data[0]);
-		});
-}
-
-/**
- *
- * @param {Function} setselectdata
- */
-function sangdata(code, setselectdata) {
-	fetch(`/api/mysql/sang`, {
-		method: 'POST',
-		body: JSON.stringify({
-			table: 'cd_summary_view',
-			code: code,
-		}),
-	})
-		.then((res) => res.json())
-		.then((data) => {
-			setselectdata(data.data[0]);
-		});
-}

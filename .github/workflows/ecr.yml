@@ -23,6 +23,12 @@ jobs:
         echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
         echo "DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }}" >> .env
         echo "DISCORD_CLIENT_SECRET=${{ secrets.DISCORD_CLIENT_SECRET }}" >> .env
+        echo "MYSQL_HOST=${{ secrets.MYSQL_HOST }}" >> .env
+        echo "MYSQL_DB=${{ secrets.MYSQL_DB }}" >> .env
+        echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+        echo "MYSQL_PW=${{ secrets.MYSQL_PW }}" >> .env
+        echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env
+        echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -46,6 +52,7 @@ jobs:
         docker push $ECR_REGISTRY/$IMAGE_REPO:$IMAGE_TAG
         
         docker tag $IMAGE_REPO:$IMAGE_TAG $ECR_REGISTRY/$IMAGE_REPO:$LATEST_TAG
-        docker push $ECR_REGISTRY/$IMAGE_REPO:$LATEST_TAG
+        docker push $ECR_REGISTRY/$IMAGE_REPO:$LATEST_TAG 
+
 
         

@@ -145,12 +145,13 @@ table {
 	align-items: center;
 }
 .maplibregl-popup-content .pop .label {
-	font-size: 2em;
+	font-size: 1.5em;
 	font-weight: 600;
 }
 
 .maplibregl-popup-content .pop .items {
 	display: flex;
+	align-items: center;
 }
 .maplibregl-popup-content .pop .item {
 	width: 120px;

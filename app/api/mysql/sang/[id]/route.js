@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connection from '../connect';
+import connection from '../../connect';
 
 /**
  *

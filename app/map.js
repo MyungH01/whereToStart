@@ -86,7 +86,7 @@ export default function Map() {
 				type: 'symbol',
 				source: 'sang_point',
 				filter: ['==', '$type', 'Point'],
-				minzoom: 12,
+				minzoom: 14,
 				layout: {
 					'icon-image': 'custom-marker2',
 					'icon-size': 0.7,
@@ -190,23 +190,22 @@ export default function Map() {
 			if (popups.length) {
 				popups[0].remove();
 			}
-			console.log(curheang);
-			console.log(cursang);
 			const pophtml = `
 			<div class='pop'>
 				<div class='name'>
 					<label class='label'>${curheang.name}${cursang.code == 0 ? '' : ' / ' + cursang.name}</label>
 					<div>
+						<button id='move'>이동</button>
 						<button id='favadd'>추가</button>
 						<button id='favdel'>제거</button>
 					</div>
 				</div>
 				<div class='items'>
-					<div class='item'>${cursang.code == 0 ? curheang.sum_cm_sa : cursang.sum_cm_sa}</div>
-					<div class='item'>${cursang.code == 0 ? curheang.sum_total_ns : cursang.sum_total_ns}</div>
-					<div class='item'>${cursang.code == 0 ? curheang.ratio_cm_sa_ns : cursang.ratio_cm_sa_ns}</div>
-					<div class='item'>${cursang.code == 0 ? curheang.max_total_ns_st_nm : cursang.max_total_ns_st_nm}</div>
-					<div class='item'>${cursang.code == 0 ? curheang.max_cm_sa_st_nm : cursang.max_cm_sa_st_nm}</div>
+					<div class='item'><label>분기 총 매출</label><p>${cursang.code == 0 ? curheang.sum_cm_sa : cursang.sum_cm_sa}</p></div>
+					<div class='item'><label>총 점포 수</label><p>${cursang.code == 0 ? curheang.sum_total_ns : cursang.sum_total_ns}</p></div>
+					<div class='item'><label>분기 평균 매출</label><p>${cursang.code == 0 ? curheang.ratio_cm_sa_ns : cursang.ratio_cm_sa_ns}</p></div>
+					<div class='item'><label>최다 점포 업종</label><p>${cursang.code == 0 ? curheang.max_total_ns_st_nm : cursang.max_total_ns_st_nm}</p></div>
+					<div class='item'><label>최고 매출 업종</label><p>${cursang.code == 0 ? curheang.max_cm_sa_st_nm : cursang.max_cm_sa_st_nm}</p></div>
 				</div>
 			</div>
 		`;
@@ -237,6 +236,10 @@ export default function Map() {
 					.then((data) => console.log(data));
 				dispatch(setchanged(true));
 				dispatch(setwhich(cursang.code == 0 ? 1 : 2));
+			});
+
+			document.getElementById('move').addEventListener('click', function () {
+				window.open(`/report/${cursang.code == 0 ? 'heang' : 'sang'}/${cursang.code == 0 ? curheang.code : cursang.code}`, '_blank');
 			});
 		}
 		searchboundary(curheang.code, setcboundary);

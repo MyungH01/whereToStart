@@ -54,4 +54,5 @@ jobs:
         docker push $ECR_REGISTRY/$IMAGE_REPO:$LATEST_TAG 
 
 
+
         

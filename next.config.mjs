@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	reactStrictMode: false,
+	experimental: {
+		serverComponentsExternalPackages: ['mysql2'],
+	},
 	images: {
 		remotePatterns: [
 			{
